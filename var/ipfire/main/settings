@@ -1,0 +1,7 @@
+DOMAINNAME=localdomain
+THEME=ipfire
+LANGUAGE=en.utf8
+RRDLOG=/var/log/rrd
+HOSTNAME=k01
+KEYMAP=/lib/kbd/keymaps/i386/qwerty/us.map.gz
+TIMEZONE=/usr/share/zoneinfo/posix/Asia/Shanghai
