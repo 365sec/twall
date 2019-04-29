@@ -1,0 +1,306 @@
+target     prot opt source               destination
+
+Chain POLICYFWD (1 references)
+target     prot opt source               destination
+ACCEPT     all  --  192.168.214.0/24     anywhere
+ACCEPT     all  --  anywhere             anywhere             policy match dir in pol ipsec
+ACCEPT     all  --  anywhere             anywhere
+ACCEPT     all  --  192.168.214.0/24     anywhere
+LOG        all  --  anywhere             anywhere             limit: avg 10/min burst 5 LOG level warning prefix "DROP_FORWARD "
+DROP       all  --  anywhere             anywhere             /* DROP_FORWARD */
+
+Chain POLICYIN (1 references)
+target     prot opt source               destination
+DROP       udp  --  anywhere             anywhere             udp dpt:syslog
+ACCEPT     all  --  anywhere             anywhere
+ACCEPT     all  --  anywhere             anywhere             policy match dir in pol ipsec
+ACCEPT     all  --  anywhere             anywhere
+LOG        all  --  anywhere             anywhere             limit: avg 10/min burst 5 LOG level warning prefix "DROP_INPUT "
+DROP       all  --  anywhere             anywhere             /* DROP_INPUT */
+
+Chain POLICYOUT (1 references)
+target     prot opt source               destination
+ACCEPT     all  --  anywhere             anywhere
+DROP       all  --  anywhere             anywhere             /* DROP_OUTPUT */
+
+Chain PSCAN (7 references)
+target     prot opt source               destination
+LOG        tcp  --  anywhere             anywhere             limit: avg 10/min burst 5 /* DROP_TCP PScan */ LOG level warning prefix "DROP_TCP Scan "
+LOG        udp  --  anywhere             anywhere             limit: avg 10/min burst 5 /* DROP_UDP PScan */ LOG level warning prefix "DROP_UDP Scan "
+LOG        icmp --  anywhere             anywhere             limit: avg 10/min burst 5 /* DROP_ICMP PScan */ LOG level warning prefix "DROP_ICMP Scan "
+LOG        all  -f  anywhere             anywhere             limit: avg 10/min burst 5 /* DROP_FRAG PScan */ LOG level warning prefix "DROP_FRAG Scan "
+DROP       all  --  anywhere             anywhere             /* DROP_PScan */
+
+Chain REDFORWARD (1 references)
+target     prot opt source               destination
+
+Chain REDINPUT (1 references)
+target     prot opt source               destination
+
+Chain TOR_INPUT (1 references)
+target     prot opt source               destination
+
+Chain UPNPFW (1 references)
+target     prot opt source               destination
+
+Chain WIRELESSFORWARD (1 references)
+target     prot opt source               destination
+
+Chain WIRELESSINPUT (1 references)
+target     prot opt source               destination
+[root@k01 etc]# clear
+[root@k01 etc]# iptables -L
+Chain INPUT (policy DROP)
+target     prot opt source               destination
+BADTCP     tcp  --  anywhere             anywhere
+CUSTOMINPUT  all  --  anywhere             anywhere
+P2PBLOCK   all  --  anywhere             anywhere
+GUARDIAN   all  --  anywhere             anywhere
+OVPNBLOCK  all  --  anywhere             anywhere
+IPTVINPUT  all  --  anywhere             anywhere
+ICMPINPUT  all  --  anywhere             anywhere
+LOOPBACK   all  --  anywhere             anywhere
+CAPTIVE_PORTAL  all  --  anywhere             anywhere
+CONNTRACK  all  --  anywhere             anywhere
+DHCPGREENINPUT  all  --  anywhere             anywhere
+GEOIPBLOCK  all  --  anywhere             anywhere
+IPSECINPUT  all  --  anywhere             anywhere
+GUIINPUT   all  --  anywhere             anywhere
+WIRELESSINPUT  all  --  anywhere             anywhere             ctstate NEW
+OVPNINPUT  all  --  anywhere             anywhere
+TOR_INPUT  all  --  anywhere             anywhere
+INPUTFW    all  --  anywhere             anywhere
+REDINPUT   all  --  anywhere             anywhere
+POLICYIN   all  --  anywhere             anywhere
+
+Chain FORWARD (policy DROP)
+target     prot opt source               destination
+BADTCP     tcp  --  anywhere             anywhere
+TCPMSS     tcp  --  anywhere             anywhere             tcp flags:SYN,RST/SYN TCPMSS clamp to PMTU
+CUSTOMFORWARD  all  --  anywhere             anywhere
+P2PBLOCK   all  --  anywhere             anywhere
+GUARDIAN   all  --  anywhere             anywhere
+IPSECBLOCK  all  --  anywhere             anywhere             policy match dir out pol none
+OVPNBLOCK  all  --  anywhere             anywhere
+OVPNBLOCK  all  --  anywhere             anywhere
+IPTVFORWARD  all  --  anywhere             anywhere
+LOOPBACK   all  --  anywhere             anywhere
+CAPTIVE_PORTAL  all  --  anywhere             anywhere
+CONNTRACK  all  --  anywhere             anywhere
+GEOIPBLOCK  all  --  anywhere             anywhere
+IPSECFORWARD  all  --  anywhere             anywhere
+WIRELESSFORWARD  all  --  anywhere             anywhere             ctstate NEW
+FORWARDFW  all  --  anywhere             anywhere
+UPNPFW     all  --  anywhere             anywhere             ctstate NEW
+REDFORWARD  all  --  anywhere             anywhere
+POLICYFWD  all  --  anywhere             anywhere
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination
+CUSTOMOUTPUT  all  --  anywhere             anywhere
+P2PBLOCK   all  --  anywhere             anywhere
+IPSECBLOCK  all  --  anywhere             anywhere             policy match dir out pol none
+LOOPBACK   all  --  anywhere             anywhere
+CONNTRACK  all  --  anywhere             anywhere
+DHCPGREENOUTPUT  all  --  anywhere             anywhere
+IPSECOUTPUT  all  --  anywhere             anywhere
+OUTGOINGFW  all  --  anywhere             anywhere
+POLICYOUT  all  --  anywhere             anywhere
+
+Chain BADTCP (2 references)
+target     prot opt source               destination
+RETURN     all  --  anywhere             anywhere
+PSCAN      tcp  --  anywhere             anywhere             tcp flags:FIN,SYN,RST,PSH,ACK,URG/FIN,PSH,URG
+PSCAN      tcp  --  anywhere             anywhere             tcp flags:FIN,SYN,RST,PSH,ACK,URG/FIN,SYN,RST,ACK,URG
+PSCAN      tcp  --  anywhere             anywhere             tcp flags:FIN,SYN,RST,PSH,ACK,URG/FIN,SYN,RST,PSH,ACK,URG
+PSCAN      tcp  --  anywhere             anywhere             tcp flags:FIN,SYN,RST,PSH,ACK,URG/FIN
+PSCAN      tcp  --  anywhere             anywhere             tcp flags:SYN,RST/SYN,RST
+PSCAN      tcp  --  anywhere             anywhere             tcp flags:FIN,SYN/FIN,SYN
+PSCAN      tcp  --  anywhere             anywhere             tcp flags:FIN,SYN,RST,PSH,ACK,URG/NONE
+NEWNOTSYN  tcp  --  anywhere             anywhere             tcp flags:!FIN,SYN,RST,ACK/SYN ctstate NEW
+
+Chain CAPTIVE_PORTAL (2 references)
+target     prot opt source               destination
+
+Chain CAPTIVE_PORTAL_CLIENTS (0 references)
+target     prot opt source               destination
+
+Chain CONNTRACK (3 references)
+target     prot opt source               destination
+ACCEPT     all  --  anywhere             anywhere             ctstate ESTABLISHED
+DROP       all  --  anywhere             anywhere             ctstate INVALID
+ACCEPT     icmp --  anywhere             anywhere             ctstate RELATED
+ACCEPT     all  --  anywhere             anywhere             ctstate RELATED helper match "sip"
+ACCEPT     all  --  anywhere             anywhere             ctstate RELATED helper match "h323"
+ACCEPT     tcp  --  anywhere             anywhere             ctstate RELATED helper match "ftp" tcp dpts:1024:65535
+ACCEPT     all  --  anywhere             anywhere             ctstate RELATED helper match "tftp"
+ACCEPT     all  --  anywhere             anywhere             ctstate RELATED helper match "irc"
+
+Chain CUSTOMFORWARD (1 references)
+target     prot opt source               destination
+
+Chain CUSTOMINPUT (1 references)
+target     prot opt source               destination
+
+Chain CUSTOMOUTPUT (1 references)
+target     prot opt source               destination
+
+Chain DHCPBLUEINPUT (0 references)
+target     prot opt source               destination
+
+Chain DHCPBLUEOUTPUT (0 references)
+target     prot opt source               destination
+
+Chain DHCPGREENINPUT (1 references)
+target     prot opt source               destination
+
+Chain DHCPGREENOUTPUT (1 references)
+target     prot opt source               destination
+
+Chain DHCPINPUT (0 references)
+target     prot opt source               destination
+ACCEPT     udp  --  anywhere             anywhere             udp spt:bootpc dpt:bootps
+ACCEPT     tcp  --  anywhere             anywhere             tcp spt:bootpc dpt:bootps
+
+Chain DHCPOUTPUT (0 references)
+target     prot opt source               destination
+ACCEPT     udp  --  anywhere             anywhere             udp spt:bootps dpt:bootpc
+ACCEPT     tcp  --  anywhere             anywhere             tcp spt:bootps dpt:bootpc
+
+Chain FORWARDFW (1 references)
+target     prot opt source               destination
+LOG        all  --  172.168.39.222       anywhere             TIME from 17:00:00 to 15:15:00 UTC #conn src/32 <= 8 limit: avg 10/min burst 20 LOG level warning prefix "FORWARDFW "
+REJECT     all  --  172.168.39.222       anywhere             TIME from 17:00:00 to 15:15:00 UTC #conn src/32 <= 8 reject-with icmp-port-unreachable
+LOG        all  --  192.168.214.0/24     anywhere             limit: avg 10/min burst 20 LOG level warning prefix "FORWARDFW "
+REJECT     all  --  192.168.214.0/24     anywhere             reject-with icmp-port-unreachable
+DROP       all  --  anywhere             anywhere
+
+Chain GEOIPBLOCK (2 references)
+target     prot opt source               destination
+
+Chain GUARDIAN (2 references)
+target     prot opt source               destination
+
+Chain GUIINPUT (1 references)
+target     prot opt source               destination
+ACCEPT     tcp  --  anywhere             anywhere             tcp dpt:snpp
+
+Chain ICMPINPUT (1 references)
+target     prot opt source               destination
+ACCEPT     icmp --  anywhere             anywhere             icmp echo-request
+
+Chain INPUTFW (1 references)
+target     prot opt source               destination
+LOG        all  --  172.168.39.222       anywhere             TIME from 17:00:00 to 15:15:00 UTC #conn src/32 <= 8 limit: avg 10/min burst 20 LOG level warning prefix "INPUTFW "
+REJECT     all  --  172.168.39.222       anywhere             TIME from 17:00:00 to 15:15:00 UTC #conn src/32 <= 8 reject-with icmp-port-unreachable
+LOG        all  --  192.168.214.0/24     anywhere             limit: avg 10/min burst 20 LOG level warning prefix "INPUTFW "
+REJECT     all  --  192.168.214.0/24     anywhere             reject-with icmp-port-unreachable
+
+Chain IPSECBLOCK (2 references)
+target     prot opt source               destination
+
+Chain IPSECFORWARD (1 references)
+target     prot opt source               destination
+
+Chain IPSECINPUT (1 references)
+target     prot opt source               destination
+ACCEPT     udp  --  anywhere             anywhere             udp dpt:isakmp
+ACCEPT     udp  --  anywhere             anywhere             udp dpt:ipsec-nat-t
+
+Chain IPSECOUTPUT (1 references)
+target     prot opt source               destination
+ACCEPT     udp  --  anywhere             anywhere             udp dpt:isakmp
+ACCEPT     udp  --  anywhere             anywhere             udp dpt:ipsec-nat-t
+
+Chain IPTVFORWARD (1 references)
+target     prot opt source               destination
+
+Chain IPTVINPUT (1 references)
+target     prot opt source               destination
+
+Chain LOG_DROP (0 references)
+target     prot opt source               destination
+LOG        all  --  anywhere             anywhere             limit: avg 10/min burst 5 LOG level warning
+DROP       all  --  anywhere             anywhere
+
+Chain LOG_REJECT (0 references)
+target     prot opt source               destination
+LOG        all  --  anywhere             anywhere             limit: avg 10/min burst 5 LOG level warning
+REJECT     all  --  anywhere             anywhere             reject-with icmp-port-unreachable
+
+Chain LOOPBACK (3 references)
+target     prot opt source               destination
+ACCEPT     all  --  anywhere             anywhere
+ACCEPT     all  --  anywhere             anywhere
+DROP       all  --  127.0.0.0/8          anywhere
+DROP       all  --  anywhere             127.0.0.0/8
+
+Chain NEWNOTSYN (1 references)
+target     prot opt source               destination
+LOG        all  --  anywhere             anywhere             limit: avg 10/min burst 5 LOG level warning prefix "DROP_NEWNOTSYN "
+DROP       all  --  anywhere             anywhere             /* DROP_NEWNOTSYN */
+
+Chain OUTGOINGFW (1 references)
+target     prot opt source               destination
+LOG        all  --  192.168.214.0/24     anywhere             limit: avg 10/min burst 20 LOG level warning prefix "OUTGOINGFW "
+REJECT     all  --  192.168.214.0/24     anywhere             reject-with icmp-port-unreachable
+DROP       all  --  anywhere             anywhere
+
+Chain OVPNBLOCK (3 references)
+target     prot opt source               destination
+RETURN     icmp --  anywhere             anywhere             ctstate RELATED
+
+Chain OVPNINPUT (1 references)
+target     prot opt source               destination
+
+Chain P2PBLOCK (3 references)
+target     prot opt source               destination
+
+Chain POLICYFWD (1 references)
+target     prot opt source               destination
+ACCEPT     all  --  192.168.214.0/24     anywhere
+ACCEPT     all  --  anywhere             anywhere             policy match dir in pol ipsec
+ACCEPT     all  --  anywhere             anywhere
+ACCEPT     all  --  192.168.214.0/24     anywhere
+LOG        all  --  anywhere             anywhere             limit: avg 10/min burst 5 LOG level warning prefix "DROP_FORWARD "
+DROP       all  --  anywhere             anywhere             /* DROP_FORWARD */
+
+Chain POLICYIN (1 references)
+target     prot opt source               destination
+DROP       udp  --  anywhere             anywhere             udp dpt:syslog
+ACCEPT     all  --  anywhere             anywhere
+ACCEPT     all  --  anywhere             anywhere             policy match dir in pol ipsec
+ACCEPT     all  --  anywhere             anywhere
+LOG        all  --  anywhere             anywhere             limit: avg 10/min burst 5 LOG level warning prefix "DROP_INPUT "
+DROP       all  --  anywhere             anywhere             /* DROP_INPUT */
+
+Chain POLICYOUT (1 references)
+target     prot opt source               destination
+ACCEPT     all  --  anywhere             anywhere
+DROP       all  --  anywhere             anywhere             /* DROP_OUTPUT */
+
+Chain PSCAN (7 references)
+target     prot opt source               destination
+LOG        tcp  --  anywhere             anywhere             limit: avg 10/min burst 5 /* DROP_TCP PScan */ LOG level warning prefix "DROP_TCP Scan "
+LOG        udp  --  anywhere             anywhere             limit: avg 10/min burst 5 /* DROP_UDP PScan */ LOG level warning prefix "DROP_UDP Scan "
+LOG        icmp --  anywhere             anywhere             limit: avg 10/min burst 5 /* DROP_ICMP PScan */ LOG level warning prefix "DROP_ICMP Scan "
+LOG        all  -f  anywhere             anywhere             limit: avg 10/min burst 5 /* DROP_FRAG PScan */ LOG level warning prefix "DROP_FRAG Scan "
+DROP       all  --  anywhere             anywhere             /* DROP_PScan */
+
+Chain REDFORWARD (1 references)
+target     prot opt source               destination
+
+Chain REDINPUT (1 references)
+target     prot opt source               destination
+
+Chain TOR_INPUT (1 references)
+target     prot opt source               destination
+
+Chain UPNPFW (1 references)
+target     prot opt source               destination
+
+Chain WIRELESSFORWARD (1 references)
+target     prot opt source               destination
+
+Chain WIRELESSINPUT (1 references)
+target     prot opt source               destination
